@@ -1,42 +1,52 @@
 public class DeckOfCards {
 
+    private static final String[] SUITS = {"Clubs", "Diamonds", "Hearts", "Spades"};
+    private static final String[] RANKS = {"2", "3", "4", "5", "6", "7", "8", "9", "10",
+            "Jack", "Queen", "King", "Ace"};
+    private static final int NUM_PLAYERS = 4;
+    private static final int CARDS_PER_PLAYER = 9;
+
     public static void main(String[] args) {
-        String[] suits = {"Clubs", "Diamonds", "Hearts", "Spades"};
-        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10",
-                "Jack", "Queen", "King", "Ace"};
-        int n = suits.length * ranks.length;
-        String[] deck = new String[n];
-        for (int i = 0; i < ranks.length; i++) {
-            for (int j = 0; j < suits.length; j++) {
-                deck[suits.length * i + j] = ranks[i] + " of " + suits[j];
+
+        int n = SUITS.length * RANKS.length;
+        Card[] deck = new Card[n];
+
+        for (int i = 0; i < RANKS.length; i++) {
+            for (int j = 0; j < SUITS.length; j++) {
+                int index = SUITS.length * i + j;
+                deck[index] = new Card(RANKS[i], SUITS[j], i);
             }
         }
 
         for (int i = 0; i < n; i++) {
             int r = i + (int) (Math.random() * (n - i));
-            String temp = deck[r];
+            Card temp = deck[r];
             deck[r] = deck[i];
             deck[i] = temp;
         }
 
-        final int NUM_PLAYERS = 4;
-        final int CARDS_PER_PLAYER = 9;
-        String[][] players = new String[NUM_PLAYERS][CARDS_PER_PLAYER];
+        Queue<Player> playerQueue = new Queue<>();
+
+        for (int i = 0; i < NUM_PLAYERS; i++) {
+            Player p = new Player(i + 1);
+            playerQueue.enqueue(p);
+        }
+
         int deckIndex = 0;
 
         for (int i = 0; i < CARDS_PER_PLAYER; i++) {
             for (int j = 0; j < NUM_PLAYERS; j++) {
-                players[j][i] = deck[deckIndex];
+                Player currentPlayer = playerQueue.dequeue();
+                currentPlayer.addCard(deck[deckIndex]);
                 deckIndex++;
+                playerQueue.enqueue(currentPlayer);
             }
         }
         for (int i = 0; i < NUM_PLAYERS; i++) {
-            System.out.println("\nPlayer " + (i + 1) + " (9 Cards):");
-
-            for (int j = 0; j < CARDS_PER_PLAYER; j++) {
-                System.out.println(players[i][j]);
-            }
-            System.out.println();
+            Player currentPlayer = playerQueue.dequeue();
+            currentPlayer.sortHandByRank();
+            currentPlayer.printCards();
+            playerQueue.enqueue(currentPlayer);
         }
     }
 }
